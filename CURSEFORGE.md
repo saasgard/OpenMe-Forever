@@ -12,7 +12,7 @@ Upload Media/Art/logo.png through the editor's image button and put it at the to
 
 # OpenMe Forever
 
-OpenMe Forever adds a small window that lists the items in your bags you can open. It uses the game's own window frame, so it fits in with the default UI.
+OpenMe Forever adds a small window that lists the items in your bags you can open. By default it uses the game's own window frame, so it fits in with the default UI. There's also a flat, dark modern skin and a bare-bones compact mode.
 
 The window opens by itself when you loot something that can be opened. It closes again once the list is empty.
 
