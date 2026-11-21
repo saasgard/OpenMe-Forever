@@ -3,7 +3,7 @@
 ## 1.2.0
 
 - The same item in several bag slots is now shown once, with the counts added together, instead of once per slot. The item count at the bottom counts every item.
-- List is now the default layout. If you were on 1.1.0, you're switched to the list once; `/openme grid` or the options switch back, and that choice is kept.
+- List is now the default layout for new installs. If you already use OpenMe, your settings are kept as they are.
 - The window now also pops up when you loot more of an item that's already listed.
 
 ## 1.1.0

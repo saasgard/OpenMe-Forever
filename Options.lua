@@ -218,27 +218,25 @@ local function Build()
 		return pair
 	end
 
-	local function GetDB() return ns.GetDB() or {} end
-
 	----------------------------------------------------------------------
 	-- Contents
 	----------------------------------------------------------------------
 	Section("Window")
 	Check("Open by itself when you loot something",
 		"Pops the window up when something you can open lands in your bags, and hides it when the list is empty.",
-		function() return GetDB().auto end,
+		function() return ns.IsAuto() end,
 		function(on) ns.SetAuto(on) end)
 	Check("Show items as a list",
 		"Shows each item on its own row with its name. Turn off for a grid of icons.",
-		function() return GetDB().layout == "list" end,
+		function() return ns.IsList() end,
 		function(on) ns.SetLayout(on and "list" or "grid") end)
 	Check("Compact",
 		"Just the items in a thin box: no title bar, buttons or frame art. Drag the edge to move it, press Escape or type /openme to close it, and type /openme options to get back here.",
-		function() return GetDB().compact end,
+		function() return ns.IsCompact() end,
 		function(on) ns.SetCompact(on) end)
 	Check("Modern skin",
 		"A flat, dark look in the same style as DMme's Dark theme. Turn off to use the game's own window style.",
-		function() return GetDB().skin == "modern" end,
+		function() return ns.IsModern() end,
 		function(on) ns.SetSkin(on and "modern" or "classic") end)
 
 	y = y - 8

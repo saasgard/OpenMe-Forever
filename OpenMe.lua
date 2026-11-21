@@ -80,12 +80,22 @@ local C = {
 	sep         = { 0.2, 0.2, 0.25, 1 },
 }
 
-local function IsModern()
+-- Settings: only what the player changes is saved; anything missing (nil)
+-- means the current default. That way a new default never overrides a choice.
+local function IsModern()      -- default: classic skin
 	return db ~= nil and db.skin == "modern"
 end
 
-local function IsCompact()
+local function IsCompact()     -- default: off
 	return db ~= nil and db.compact == true
+end
+
+local function IsList()        -- default: list
+	return db == nil or db.layout ~= "grid"
+end
+
+local function IsAuto()        -- default: on
+	return db == nil or db.auto ~= false
 end
 
 -- Accent colour: the class colour of the character you're playing.
@@ -690,7 +700,7 @@ local function Layout()
 	local compact = IsCompact()
 	local M = compact and COMPACT or NORMAL
 	local n = #items
-	local list = db and db.layout == "list"
+	local list = IsList()
 	local cols = list and 1 or M.cols
 	local rows = math.max(1, math.ceil(n / cols))
 	local nameFont = compact and GameFontNormalSmall or GameFontNormal
@@ -783,7 +793,7 @@ function Refresh()
 	ScanBags()
 	Layout()
 
-	if db and db.auto and not silent then
+	if IsAuto() and not silent then
 		if itemTotal > lastCount then
 			frame:Show()          -- something new to open: pop up
 		elseif itemTotal == 0 then
@@ -853,8 +863,10 @@ ns.Accent = Accent
 ns.SetGradientV = SetGradientV
 ns.FlatButton = FlatButton
 ns.IsModern = IsModern
+ns.IsCompact = IsCompact
+ns.IsList = IsList
+ns.IsAuto = IsAuto
 ns.skinHooks = skinHooks
-ns.GetDB = function() return db end
 ns.SetAuto = SetAuto
 ns.SetLayout = SetLayout
 ns.SetSkin = SetSkin
@@ -887,14 +899,6 @@ events:SetScript("OnEvent", function(_, event, arg1)
 		if arg1 ~= ADDON_NAME then return end
 		OpenMeForeverDB = OpenMeForeverDB or {}
 		db = OpenMeForeverDB
-		if db.auto == nil then db.auto = true end
-		-- 1.1.0 saved "grid" for everyone without asking; list is the default now.
-		if (db.version or 1) < 2 then
-			db.layout = nil
-			db.version = 2
-		end
-		if db.layout ~= "grid" then db.layout = "list" end
-		if db.skin ~= "modern" then db.skin = "classic" end
 		if db.pos then
 			frame:ClearAllPoints()
 			frame:SetPoint(db.pos[1], UIParent, db.pos[2], db.pos[3], db.pos[4])
@@ -926,13 +930,13 @@ SLASH_OPENMEFOREVER1 = "/openme"
 SlashCmdList.OPENMEFOREVER = function(msg)
 	msg = strtrim((msg or ""):lower())
 	if msg == "auto" then
-		SetAuto(not db.auto)
-		Print("Auto pop-up " .. (db.auto and "|cff00ff00on|r" or "|cffff2020off|r") .. ".")
+		SetAuto(not IsAuto())
+		Print("Auto pop-up " .. (IsAuto() and "|cff00ff00on|r" or "|cffff2020off|r") .. ".")
 		if ns.UpdateOptions then ns.UpdateOptions() end
 		return
 	elseif msg == "grid" or msg == "list" or msg == "layout" then
 		if msg == "layout" then
-			msg = db.layout == "list" and "grid" or "list"
+			msg = IsList() and "grid" or "list"
 		end
 		SetLayout(msg)
 		Print("Layout set to " .. msg .. ".")
@@ -945,8 +949,8 @@ SlashCmdList.OPENMEFOREVER = function(msg)
 		Print("Skin set to " .. msg .. ".")
 		return
 	elseif msg == "compact" then
-		SetCompact(not db.compact)
-		Print("Compact mode " .. (db.compact and "|cff00ff00on|r" or "|cffff2020off|r") .. ".")
+		SetCompact(not IsCompact())
+		Print("Compact mode " .. (IsCompact() and "|cff00ff00on|r" or "|cffff2020off|r") .. ".")
 		return
 	elseif msg == "unignore" or msg == "reset" then
 		Print(Unignore() and "No longer ignoring any items." or "No items were being ignored.")
