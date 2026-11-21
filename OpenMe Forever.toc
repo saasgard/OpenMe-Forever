@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: OpenMe Forever
+## Notes: Pops up a window listing bag items you can open (boxes, clams, satchels) and items that start a new quest. Click to open. /openme
+## Author: Skeide
+## Version: 1.2.0
+## SavedVariables: OpenMeForeverDB
+## IconTexture: Interface\AddOns\OpenMe Forever\Media\Icon
+
+OpenMe.lua
+Options.lua
