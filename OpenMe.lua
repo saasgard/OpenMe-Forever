@@ -224,6 +224,7 @@ local function ScanBags()
 	ignoredCount = 0
 	local quests = {}
 	local byKey = {}
+	local unlisted = {}   -- keys with at least one copy that isn't openable (e.g. a locked lockbox)
 	for bag = 0, NUM_BAGS do
 		for slot = 1, C_Container.GetContainerNumSlots(bag) do
 			local info = C_Container.GetContainerItemInfo(bag, slot)
@@ -255,9 +256,16 @@ local function ScanBags()
 							items[#items + 1] = entry
 						end
 					end
+				elseif key then
+					unlisted[key] = true
 				end
 			end
 		end
+	end
+	-- Entries whose item also sits somewhere unopenable must be used by slot,
+	-- or the game might pick the unopenable copy (see ItemRef).
+	for key, entry in pairs(byKey) do
+		entry.bySlot = unlisted[key]
 	end
 	-- Quest starters go first so "Open Next" offers them before containers.
 	for i = #quests, 1, -1 do
@@ -486,7 +494,13 @@ local function Button_OnEnter(self)
 	if not self.bag then return end
 	if self.rowHi and self.nameText:IsShown() then self.rowHi:Show() end
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetBagItem(self.bag, self.slot)
+	-- The first slot may have been emptied since the list was built (e.g. in combat).
+	local slotID = C_Container.GetContainerItemID and C_Container.GetContainerItemID(self.bag, self.slot)
+	if self.itemID and slotID ~= self.itemID and GameTooltip.SetItemByID then
+		GameTooltip:SetItemByID(self.itemID)
+	else
+		GameTooltip:SetBagItem(self.bag, self.slot)
+	end
 	GameTooltip:AddLine(self.isQuest and "Left-click to view quest" or "Left-click to open", 0.1, 1, 0.1)
 	GameTooltip:AddLine("Right-click to ignore until logout", 0.6, 0.6, 0.6)
 	GameTooltip:Show()
@@ -694,6 +708,18 @@ local function ListWidth(M, font)
 	return math.max(M.minListWidth, math.min(M.listWidth, w))
 end
 
+-- What a button's "item" attribute points at. Normally the item itself
+-- ("item:<id>"): the game then uses whichever copy is still in the bags, so a
+-- button never points at a slot that was just emptied (the list can't be
+-- rebuilt during combat). Falls back to the bag slot when some copies of the
+-- item aren't openable, or the item has no ID.
+local function ItemRef(item)
+	if item.id and not item.bySlot then
+		return "item:" .. item.id
+	end
+	return item.bag .. " " .. item.slot
+end
+
 local function Layout()
 	ApplySkin()
 	local m = IsModern()
@@ -750,7 +776,8 @@ local function Layout()
 		b.rowHi:Hide()
 		b.bag, b.slot, b.ignoreKey = item.bag, item.slot, IgnoreKey(item.id, item.link)
 		SetItemButtonDesaturated(b, false)
-		b:SetAttribute("item", item.bag .. " " .. item.slot)
+		b.itemID = item.id
+		b:SetAttribute("item", ItemRef(item))
 		SetItemButtonTexture(b, item.icon)
 		SetItemButtonCount(b, item.count)
 		SetItemButtonQuality(b, item.quality, item.link)
@@ -761,14 +788,14 @@ local function Layout()
 		b:Show()
 	end
 	for i = n + 1, #buttons do
-		buttons[i].bag, buttons[i].slot, buttons[i].ignoreKey = nil, nil, nil
+		buttons[i].bag, buttons[i].slot, buttons[i].ignoreKey, buttons[i].itemID = nil, nil, nil, nil
 		buttons[i]:SetAttribute("item", nil)
 		buttons[i]:Hide()
 	end
 
 	local ignoredSuffix = ignoredCount > 0 and ("  |cff808080(" .. ignoredCount .. " ignored)|r") or ""
 	if n > 0 then
-		openNext:SetAttribute("item", items[1].bag .. " " .. items[1].slot)
+		openNext:SetAttribute("item", ItemRef(items[1]))
 		openNext:Enable()
 		emptyText:Hide()
 		countText:SetText((itemTotal == 1 and "1 item" or (itemTotal .. " items")) .. ignoredSuffix)
@@ -781,9 +808,23 @@ local function Layout()
 	OpenNext_Style(openNext, false)
 end
 
+-- In combat the list can't be rebuilt, but the stack counts can still be
+-- kept up to date, and items you've used up are greyed out.
+local GetItemCount = (C_Item and C_Item.GetItemCount) or GetItemCount
+local function UpdateCountsInCombat()
+	for _, b in ipairs(buttons) do
+		if b:IsShown() and b.itemID and GetItemCount then
+			local n = GetItemCount(b.itemID) or 0
+			SetItemButtonCount(b, n)
+			if n == 0 then SetItemButtonDesaturated(b, true) end
+		end
+	end
+end
+
 function Refresh()
 	if InCombatLockdown() then
 		pendingRefresh = true
+		UpdateCountsInCombat()
 		return
 	end
 	pendingRefresh = false

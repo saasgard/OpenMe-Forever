@@ -5,6 +5,8 @@
 - The same item in several bag slots is now shown once, with the counts added together, instead of once per slot. The item count at the bottom counts every item.
 - List is now the default layout for new installs. If you already use OpenMe, your settings are kept as they are.
 - The window now also pops up when you loot more of an item that's already listed.
+- Fixed an error ("bad argument #1 ... IsEquippableItem") when clicking an item, or Open Next, whose bag slot had just been emptied, most often during combat. Buttons now use the item itself rather than a bag slot, so they keep working as you open a stack.
+- During combat, item counts in the window now go down as you open things, and items you've used up are greyed out until combat ends.
 
 ## 1.1.0
 
