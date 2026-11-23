@@ -41,6 +41,7 @@ Because opening items needs a real click, the window can't be opened, closed, mo
 - `Media/Art/logo.png`: 1280×640 banner for the top of a project description
 - `Media/Art/curseforge_avatar_400.png`: 400×400 PNG project avatar (CurseForge requires 400×400 and advises against WebP)
 - `Media/Art/icon_512.png`, `icon_64.png`: the icon at high and in-game resolution
+- `.pkgmeta`, `.github/workflows/release.yml`: pushing a version tag (`v1.2.0`, ...) builds the addon and uploads it to CurseForge (project 1805809) and GitHub releases. Needs the `CF_API_KEY` repository secret.
 - `Tools/make_art.py`: regenerates the art (`python Tools/make_art.py Media/Art`, needs Pillow)
 
 ## Author

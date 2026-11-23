@@ -1,0 +1,14 @@
+package-as: OpenMe Forever
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - Tools
+  - dist
+  - Media/Art
+  - CURSEFORGE.md
+  - .github
+  - .gitattributes
+  - .gitignore

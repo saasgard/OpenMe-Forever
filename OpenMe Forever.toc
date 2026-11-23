@@ -3,6 +3,7 @@
 ## Notes: Pops up a window listing bag items you can open (boxes, clams, satchels) and items that start a new quest. Click to open. /openme
 ## Author: Skeide
 ## Version: 1.2.0
+## X-Curse-Project-ID: 1805809
 ## SavedVariables: OpenMeForeverDB
 ## IconTexture: Interface\AddOns\OpenMe Forever\Media\Icon
 
